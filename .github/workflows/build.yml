@@ -1,0 +1,84 @@
+name: Build geoip files
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 5"
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - "assets/*"
+      - ".gitignore"
+      - "LICENSE*"
+      - "*.md"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout codebase
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Checkout Loyalsoldier/geoip
+        uses: actions/checkout@v6
+        with:
+          repository: Loyalsoldier/geoip
+          path: geoip
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: ./geoip/go.mod
+
+      - name: Set variables
+        run: |
+          echo "TAG_NAME=$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
+          echo "RELEASE_NAME=$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Download GeoLite2 databases
+        env:
+          CURL: "curl -fsSL --retry 3 --retry-delay 2 --retry-connrefused"
+        run: |
+          mkdir -p geolite2
+          ${CURL} -o ./geolite2/GeoLite2-ASN-CSV.zip "https://raw.githubusercontent.com/8bitsaver/maxmind-geoip/release/GeoLite2-ASN-CSV.zip"
+
+      - name: Prepare GeoLite2 databases
+        run: |
+          unzip -j ./geolite2/GeoLite2-ASN-CSV.zip '*/GeoLite2-ASN-Blocks-*.csv' -d ./geolite2
+
+      - name: Build geoip files
+        run: |
+          go build -C geoip ./
+          ./geoip/geoip convert -c ./config.json
+
+      - name: Generate sha256 checksum for dat files
+        run: |
+          cd ./output || exit 1
+          for name in *.dat; do
+            sha256sum "${name}" > ./"${name}.sha256sum"
+          done
+
+      - name: Remove some files to avoid publishing to GitHub release
+        run: |
+          rm -rf ./geolite2
+          rm -rf ./output/{clash,dat,mrs,nginx,srs,surge,text}
+
+      - name: Upload files to GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          make_latest: true
+          tag_name: ${{ env.TAG_NAME }}
+          name: Release ${{ env.RELEASE_NAME }}
+          files: |
+            ./output/*.dat
+            ./output/*.dat.sha256
+            ./output/*.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

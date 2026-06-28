@@ -1,0 +1,120 @@
+{
+  "input": [
+    {
+      "type": "v2rayGeoIPDat",
+      "action": "add",
+      "args": {
+        "uri": "https://raw.githubusercontent.com/Loyalsoldier/geoip/release/geoip.dat"
+      }
+    },
+    {
+      "type": "maxmindGeoLite2ASNCSV",
+      "action": "add",
+      "args": {
+        "ipv4": "./geolite2/GeoLite2-ASN-Blocks-IPv4.csv",
+        "ipv6": "./geolite2/GeoLite2-ASN-Blocks-IPv6.csv",
+        "wantedList": {
+          "akamai": [
+            "AS402542",
+            "AS400095",
+            "AS395747",
+            "AS394536",
+            "AS209242",
+            "AS203898",
+            "AS202623",
+            "AS14789",
+            "AS139242",
+            "AS133877",
+            "AS13335",
+            "AS132892"
+          ],
+          "cdn77": [ "60068" ]
+        }
+      }
+    },
+    {
+      "type": "json",
+      "action": "add",
+      "args": {
+        "name": "amazon",
+        "uri": "https://ip-ranges.amazonaws.com/ip-ranges.json",
+        "jsonPath": [
+          "prefixes.#(service==\"AMAZON\")#.ip_prefix",
+          "ipv6_prefixes.#(service==\"AMAZON\")#.ipv6_prefix"
+        ]
+      }
+    },
+    {
+      "type": "text",
+      "action": "add",
+      "args": {
+        "name": "microsoft",
+        "uri": "https://raw.githubusercontent.com/lord-alfred/ipranges/main/microsoft/ipv4.txt",
+        "onlyIPType": "ipv4"
+      }
+    },
+    {
+      "type": "text",
+      "action": "add",
+      "args": {
+        "name": "microsoft",
+        "uri": "https://raw.githubusercontent.com/lord-alfred/ipranges/main/microsoft/ipv6.txt",
+        "onlyIPType": "ipv6"
+      }
+    }
+  ],
+  "output": [
+    {
+      "type": "v2rayGeoIPDat",
+      "action": "output",
+      "args": {
+        "outputDir": "./output",
+        "outputName": "geoip.dat"
+      }
+    },
+    {
+      "type": "v2rayGeoIPDat",
+      "action": "output",
+      "args": {
+        "outputDir": "./output",
+        "outputName": "geoip-asn.dat",
+        "wantedList": [
+          "cloudflare",
+          "cloudfront",
+          "facebook",
+          "fastly",
+          "google",
+          "netflix",
+          "telegram",
+          "twitter",
+          "akamai",
+          "cdn77",
+          "microsoft",
+          "amazon"
+        ]
+      }
+    },
+    {
+      "type": "text",
+      "action": "output",
+      "args": {
+        "outputDir": "./output",
+        "onlyIPType": "ipv4",
+        "wantedList": [
+          "cloudflare",
+          "cloudfront",
+          "facebook",
+          "fastly",
+          "google",
+          "netflix",
+          "telegram",
+          "twitter",
+          "akamai",
+          "cdn77",
+          "microsoft",
+          "amazon"
+        ]
+      }
+    }
+  ]
+}
