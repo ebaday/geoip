@@ -70,6 +70,18 @@ jobs:
           rm -rf ./geolite2
           rm -rf ./output/{clash,dat,mrs,nginx,srs,surge,text}
 
+      - name: Push to release branch
+        run: |
+          cd ./output || exit 1
+          git init
+          git config --local user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b release
+          git add -A
+          git commit -m "Auto-update GeoIP databases: ${{ env.RELEASE_NAME }}"
+          git remote add geoip "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
+          git push -f -u geoip release
+
       - name: Upload files to GitHub release
         uses: softprops/action-gh-release@v3
         with:
@@ -78,7 +90,7 @@ jobs:
           name: Release ${{ env.RELEASE_NAME }}
           files: |
             ./output/*.dat
-            ./output/*.dat.sha256
+            ./output/*.dat.sha256sum
             ./output/*.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
