@@ -52,6 +52,28 @@
       }
     },
     {
+      "type": "json",
+      "action": "add",
+      "args": {
+        "name": "github",
+        "uri": "https://api.github.com/meta",
+        "jsonPath": [
+          "hooks",
+          "web",
+          "api",
+          "git",
+          "github_enterprise_importer",
+          "packages",
+          "pages",
+          "importer",
+          "actions",
+          "actions_macos",
+          "codespaces",
+          "copilot"
+        ]
+      }
+    },
+    {
       "type": "text",
       "action": "add",
       "args": {
@@ -97,7 +119,8 @@
           "akamai",
           "cdn77",
           "microsoft",
-          "amazon"
+          "amazon",
+          "github"
         ]
       }
     },
@@ -119,7 +142,8 @@
           "akamai",
           "cdn77",
           "microsoft",
-          "amazon"
+          "amazon",
+          "github"
         ]
       }
     }
